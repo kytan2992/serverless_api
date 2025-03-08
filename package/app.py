@@ -2,6 +2,7 @@ import boto3
 import os
 import json
 import logging
+client = boto3.client('sns')
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -54,10 +55,12 @@ def lambda_handler(event, context):
 
     logging.info(f"body: {body}")
     response_body = json.dumps(body)
+    response = client.publish(TopicArn= os.environ.get('SNS_TOPIC_ARN'),Message="default message")
+    print("Message published")
     return {
         "statusCode": 200,
         "headers": {
             "Content-Type": "application/json"
         },
-        "body": response_body
+        "body": response_body 
     }

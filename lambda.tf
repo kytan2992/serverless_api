@@ -14,7 +14,10 @@ resource "aws_lambda_function" "http_api_lambda" {
   role             = aws_iam_role.lambda_exec.arn
 
   environment {
-    variables = {} # todo: fill with apporpriate value
+    variables = {
+      DDB_TABLE     = aws_dynamodb_table.table.name
+      SNS_TOPIC_ARN = aws_sns_topic.my_sns_topic.arn
+    } # todo: fill with apporpriate value
   }
 }
 
@@ -45,7 +48,10 @@ resource "aws_iam_policy" "lambda_exec_role" {
         {
             "Effect": "Allow",
             "Action": [
-                "dynamodb:GetItem"
+                "dynamodb:GetItem",
+                "dynamodb:PutItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:Scan"
             ],
             "Resource": "${aws_dynamodb_table.table.arn}"
         },
@@ -57,6 +63,13 @@ resource "aws_iam_policy" "lambda_exec_role" {
                 "logs:PutLogEvents"
             ],
             "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "sns:Publish"
+            ],
+            "Resource": "${aws_sns_topic.my_sns_topic.arn}"
         }
     ]
 }
